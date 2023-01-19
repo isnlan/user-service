@@ -4,6 +4,7 @@ use actix_web::{
     web::{self},
     Error, HttpResponse,
 };
+use uuid::Uuid;
 
 use crate::model;
 
@@ -11,6 +12,7 @@ use super::Controller;
 
 pub async fn get_user_list() -> Result<HttpResponse, Error> {
     let u1 = model::User {
+        id: Uuid::new_v4(),
         name: String::from("renjun"),
         age: 30,
         pwd: String::from("123456"),
@@ -35,6 +37,7 @@ pub async fn create_user(
     ctrl.UserSerice.pr();
 
     let user = model::User {
+        id: uuid::Uuid::new_v4(),
         name: req.name,
         age: req.age,
         pwd: req.pwd,
