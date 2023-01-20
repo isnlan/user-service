@@ -60,17 +60,22 @@ prepare:
 buildenv: clean
 	@docker build -t $(DOCKER_RUN_RUST_IMAGE) image/ -f image/Dockerfile.env
 
-depmac: 
-	@brew install libpq; brew reinstall sqlite; brew install mysql-client; brew install mysql-connector-c 
+depmac:
+	@brew install libpq; brew reinstall sqlite; brew install mysql-client; brew install mysql-connector-c
 
 depapt:
 	@sudo apt-get install libmysqlclient-dev libsqlite3-dev libpq-dev
-	
 dep:
 	@cargo install sqlx-cli
 
+migration:
+	@DATABASE_URL=postgres://snlan:123456@192.168.36.130:5432/postgres sqlx migrate run
+
+pg:
+	@psql -U snlan -W -h
+
 mysql:
-	@diesel setup --database-url='mysql://root:root@127.0.0.1:3306/user_center?parseTime=true&charset=utf8mb4'  
+	@diesel setup --database-url='mysql://root:root@127.0.0.1:3306/user_center?parseTime=true&charset=utf8mb4'
 	@diesel migration generate user
 
 build: buildenv

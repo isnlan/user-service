@@ -16,7 +16,7 @@ where
 impl<T: Serialize> Response<T> {
     pub fn ok(data: Option<T>) -> Self {
         Response {
-            code: 0,
+            code: SUCCESS_CODE,
             message: SUCCESS_MSG.to_string(),
             data,
         }

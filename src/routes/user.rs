@@ -4,21 +4,17 @@ use actix_web::{
     web::{self},
     Error, HttpResponse,
 };
-use uuid::Uuid;
 
-use crate::model;
+use crate::{model, service};
 
-use super::Controller;
+pub async fn get_user_list(
+    mgr: web::Data<sync::Arc<service::Manager>>,
+) -> Result<HttpResponse, Error> {
+    let mut list = vec![];
 
-pub async fn get_user_list() -> Result<HttpResponse, Error> {
-    let u1 = model::User {
-        id: Uuid::new_v4(),
-        name: String::from("renjun"),
-        age: 30,
-        pwd: String::from("123456"),
-    };
-
-    let list = vec![u1];
+    if let Some(user) = mgr.user_serice.find_by_id(1).await? {
+        list.push(user);
+    }
 
     let resp = model::ResponseList {
         total: 1,
@@ -29,19 +25,19 @@ pub async fn get_user_list() -> Result<HttpResponse, Error> {
 }
 
 pub async fn create_user(
-    ctrl: web::Data<sync::Arc<Controller>>,
+    mgr: web::Data<sync::Arc<service::Manager>>,
     req: web::Json<model::RequestCreateUser>,
 ) -> Result<HttpResponse, Error> {
     let req = req.into_inner();
 
-    ctrl.UserSerice.pr();
-
     let user = model::User {
-        id: uuid::Uuid::new_v4(),
+        id: None,
         name: req.name,
         age: req.age,
         pwd: req.pwd,
     };
+
+    mgr.user_serice.save(&user).await?;
 
     model::Response::ok(Some(user)).to_json_result()
 }

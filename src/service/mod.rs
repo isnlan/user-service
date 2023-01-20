@@ -1,3 +1,18 @@
-mod user_service;
+use std::sync::Arc;
 
-pub use user_service::*;
+mod user_service;
+use crate::model::*;
+
+pub struct Manager {
+    pub user_serice: user_service::UserService,
+}
+
+impl Manager {
+    pub fn new(pool: sqlx::PgPool) -> Arc<Self> {
+        let mgr = Manager {
+            user_serice: user_service::UserService::new(UserOp::new(pool)),
+        };
+
+        Arc::new(mgr)
+    }
+}
