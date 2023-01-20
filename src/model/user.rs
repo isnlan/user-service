@@ -61,20 +61,9 @@ impl Dao for UserOp {
             .await
         {
             Ok(v) => Ok(v),
-            Err(error) => {
-                tracing::event!(
-                    tracing::Level::ERROR,
-                    code = error
-                        .as_database_error()
-                        .unwrap()
-                        .code()
-                        .unwrap()
-                        .parse::<i32>()
-                        .unwrap(),
-                    db_message = error.as_database_error().unwrap().message(),
-                    constraint = error.as_database_error().unwrap().constraint().unwrap()
-                );
-                Err(Error::DatabaseQueryError(error))
+            Err(err) => {
+                tracing::event!(tracing::Level::ERROR, "{:?}", err);
+                Err(Error::DatabaseQueryError(err))
             }
         }
     }
