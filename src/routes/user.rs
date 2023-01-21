@@ -1,15 +1,16 @@
 use std::sync;
 
-use actix_web::{
-    web::{self},
-    Error, HttpResponse,
+use axum::{extract::State, Json};
+
+use crate::{
+    errors::Error,
+    model::{self, User},
+    service,
 };
 
-use crate::{model, service};
-
 pub async fn get_user_list(
-    mgr: web::Data<sync::Arc<service::Manager>>,
-) -> Result<HttpResponse, Error> {
+    mgr: State<sync::Arc<service::Manager>>,
+) -> Result<model::Response<model::ResponseList<User>>, Error> {
     let mut list = vec![];
 
     if let Some(user) = mgr.user_serice.find_by_id(1).await? {
@@ -21,14 +22,14 @@ pub async fn get_user_list(
         list: list,
     };
 
-    model::Response::ok(Some(resp)).to_json_result()
+    Ok(model::Response::ok(Some(resp)))
 }
 
 pub async fn create_user(
-    mgr: web::Data<sync::Arc<service::Manager>>,
-    req: web::Json<model::RequestCreateUser>,
-) -> Result<HttpResponse, Error> {
-    let req = req.into_inner();
+    mgr: State<sync::Arc<service::Manager>>,
+    Json(req): Json<model::RequestCreateUser>,
+) -> Result<model::Response<User>, Error> {
+    let req = req;
 
     let user = model::User {
         id: None,
@@ -39,5 +40,5 @@ pub async fn create_user(
 
     mgr.user_serice.save(&user).await?;
 
-    model::Response::ok(Some(user)).to_json_result()
+    Ok(model::Response::ok(Some(user)))
 }

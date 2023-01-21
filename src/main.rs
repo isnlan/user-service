@@ -1,6 +1,5 @@
-use std::env;
+use std::{env, net::SocketAddr};
 
-use actix_web::{web::Data, App, HttpServer};
 use sqlx::postgres::PgPoolOptions;
 use tracing_subscriber::fmt::format::FmtSpan;
 
@@ -10,7 +9,7 @@ mod routes;
 mod service;
 
 #[tokio::main]
-async fn main() -> std::io::Result<()> {
+async fn main() {
     tracing_subscriber::fmt()
         .with_span_events(FmtSpan::CLOSE)
         .init();
@@ -26,12 +25,11 @@ async fn main() -> std::io::Result<()> {
 
     let mgr = service::Manager::new(pool.clone());
 
-    HttpServer::new(move || {
-        App::new()
-            .app_data(Data::new(mgr.clone()))
-            .configure(routes::app_config)
-    })
-    .bind(("127.0.0.1", 8080))?
-    .run()
-    .await
+    let addr = SocketAddr::from(([127, 0, 0, 1], 8080));
+    tracing::debug!("listening on {}", addr);
+
+    axum::Server::bind(&addr)
+        .serve(routes::route(mgr).into_make_service())
+        .await
+        .unwrap();
 }

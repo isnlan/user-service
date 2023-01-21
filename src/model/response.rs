@@ -1,4 +1,6 @@
+use axum::{http, Json};
 use serde::Serialize;
+use serde_json::json;
 
 const SUCCESS_CODE: i32 = 0;
 const SUCCESS_MSG: &str = "ok";
@@ -21,9 +23,13 @@ impl<T: Serialize> Response<T> {
             data,
         }
     }
+}
 
-    pub fn to_json_result(&self) -> Result<actix_web::HttpResponse, actix_web::Error> {
-        Ok(actix_web::HttpResponse::Ok().json(self))
+impl<T: Serialize> axum::response::IntoResponse for Response<T> {
+    fn into_response(self) -> axum::response::Response {
+        let body = Json(json!(self));
+
+        (http::StatusCode::OK, body).into_response()
     }
 }
 
