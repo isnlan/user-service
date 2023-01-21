@@ -15,7 +15,7 @@ async fn main() {
         .init();
 
     let connection_str = env::var("DATABASE_URL")
-        .unwrap_or("postgres://snlan:123456@192.168.36.130:5432/postgres".to_string());
+        .unwrap_or_else(|_| "postgres://snlan:123456@192.168.36.130:5432/postgres".to_string());
 
     let pool = PgPoolOptions::new()
         .max_connections(5)
