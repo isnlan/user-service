@@ -1,9 +1,6 @@
 use axum::{
     extract::TypedHeader,
-    http::StatusCode,
     response::sse::{Event, Sse},
-    routing::{get, get_service},
-    Router,
 };
 use futures::stream::{self, Stream};
 use std::{convert::Infallible, time::Duration};
